@@ -40,7 +40,8 @@ def shell_split(string, braces=False, brackets=False, parentheses=False):
                 tracked = unclosed_char + tracked
 
             #Append to String Parts
-            parts.append(tracked)
+            if len(tracked) > 0:
+                parts.append(tracked)
             break
         else:
             #Get Character and Increment Counter
