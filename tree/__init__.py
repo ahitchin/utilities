@@ -7,68 +7,74 @@ Node = TypeVar("T", bound="Node")
 class Node(object):
     def __init__(self, data: Any = None) -> None:
         """Initializer for Node objects.
-        
+
         :param data: any data to be held by the Node
         """
         self.data = data
-        self.children = []
-        self.parent = None
+        self.__children = []
+        self.__parent = None
 
     @property
     def data(self) -> Any:
-        """Get objects data attribute"""
+        """Get objects data attribute."""
         return self.__data
 
     @data.setter
     def data(self, data: Any) -> None:
-        """Set objects data attribute"""
+        """Set objects data attribute."""
         self.__data = data
 
     @property
     def children(self) -> List[Node]:
-        """Get objects children attribute"""
+        """Get objects children attribute."""
         return self.__children
-
-    @children.setter
-    def children(self, children: List[Any]) -> None:
-        """Set objects children attribute"""
-        self.__children = children
 
     @property
     def parent(self) -> Node:
-        """Get objects parent attribute"""
+        """Get objects parent attribute."""
         return self.__parent
 
-    @parent.setter
-    def parent(self, parent: Node) -> None:
-        """Set objects parent attribute"""
-        self.__parent = parent
+    @property
+    def root(self) -> Node:
+        """Get top level node of tree."""
+        current = self
+        while current.parent is not None:
+            current = current.parent
+
+        return current
+
+    @property
+    def siblings(self) -> List[Node]:
+        """Return the nodes adjacent siblings."""
+        # If Node is Root, Return Empty List
+        if self.parent is None:
+            return []
+
+        return self.parent.children
 
     def add_child(self, obj: Any) -> None:
         """Add children Nodes to current Nodes children list."""
-        obj.parent = self
-        self.children.append(obj)
+        # Make Node if Object is Not Already a Node Instance
+        if not isinstance(obj, Node):
+            obj = Node(obj)
 
-    def traverse(self) -> Generator:
-        """Traverse all nodes of tree."""
-        # Put First in Stack
-        stack = LifoQueue()
-        stack.put(self)
+        # Track Parent/Child Relationship
+        obj.__parent = self
+        self.__children.append(obj)
 
-        # Loop Until Tree is Exausted
-        while stack.qsize() > 0:
-            current = stack.get()
-            for child in current.children:
-                stack.put(child)
-            yield current
-    
-    def __str__(self) -> str:
-        """Display nodes data"""
-        return str(self.data)
+    def display(self, from_root: bool = False) -> str:
+        """String representation of tree from either the current node or root.
 
-    def __repr__(self) -> str:
-        """Display node child tree"""
-        def dive(node: Node, last: str = "", prefix: str = "", string: List[str] = []):
+        :param from_root: bool to start tree from root instead of current node
+        :return: string representation of tree
+        """
+
+        def dive(
+            node: Node,
+            last: str = "",
+            prefix: str = "",
+            string: List[str] = []
+        ) -> str:
             """Recursively traverse nodes and build tree.
 
             :param node: Node object
@@ -78,7 +84,7 @@ class Node(object):
             :return: string representation of node tree
             """
             # Determine Leaf String
-            if node.parent is None:
+            if len(prefix) == 0:
                 current = f"{prefix}└─ "
             elif node.parent.children[-1] is not node:
                 current = f"{prefix}├─ "
@@ -86,16 +92,42 @@ class Node(object):
                 current = f"{prefix}└─ "
             else:
                 current = f"{''.join([prefix[:-3], (3 * ' ')])}└─ "
-    
+
             # Track Recurse Vars
             last = current[-3]
             prefix += f"│{2 * ' '}" if last == "├" else f"{3 * ' '}"
-            string.append("".join([current, node.data]))
-            
+            string.append("".join([current, str(node.data)]))
+
             # Re-Call on Children
             for child in node.children:
                 dive(child, last=last, prefix=prefix)
-    
+
             return "\n".join(string)
-    
-        return dive(self)
+
+        # Return Tree from Current Node or From Root
+        if from_root is True:
+            return dive(self.root)
+        else:
+            return dive(self)
+
+    def __iter__(self) -> Generator:
+        """Overloaded __iter__ method to traverse tree from current node."""
+        # Init Stack
+        stack = LifoQueue()
+        stack.put(self)
+
+        # Iter Through Children and Yield to Caller
+        while stack.qsize() > 0:
+            current = stack.get()
+            for child in current.children:
+                stack.put(child)
+
+            yield current
+
+    def __str__(self) -> str:
+        """Overloaded __str__ method to print node data."""
+        return str(self.data)
+
+    def __repr__(self) -> str:
+        """Overloaded __repr__ method with condensed info."""
+        return f"<{self.__class__.__name__} {hex(id(self))}>"
