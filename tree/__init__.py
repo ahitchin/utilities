@@ -5,12 +5,18 @@ Node = TypeVar("T", bound="Node")
 
 
 class Node(object):
+    __slots__ = [
+        "__data",
+        "__children",
+        "__parent",
+    ]
+
     def __init__(self, data: Any = None) -> None:
         """Initializer for Node objects.
 
         :param data: any data to be held by the Node
         """
-        self.data = data
+        self.__data = data
         self.__children = []
         self.__parent = None
 
