@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from utilities.appconfig import appconfig
-from utilities.chart import matrix_table
+from utilities.chart import Chart
 from decimal import Decimal
 
 
@@ -56,7 +56,8 @@ def main():
         ])
 
     # Print Table
-    print(matrix_table(headers, table))
+    table = Chart(headers, table)
+    print(table)
 
 
 if __name__ == "__main__":
