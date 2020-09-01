@@ -1,0 +1,13 @@
+Bills:
+    - "electric"
+    - "gas"
+    - "water"
+Entities:
+    Above: 
+        Exemptions: []
+        Split: 4
+        SquareFeet: 2962
+    Below:
+        Exemptions: ["gas"]
+        Split: 1
+        SquareFeet: 1106
