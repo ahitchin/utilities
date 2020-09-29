@@ -15,9 +15,9 @@ class RecursiveNamespace(SimpleNamespace):
             if type(v) == dict:
                 setattr(self, k, RecursiveNamespace(**v))
             elif type(v) == list:
-                setattr(self, k, list(map(self.mapper, v)))
+                setattr(self, k, list(map(self.__mapper, v)))
 
-    def mapper(self, val: Any) -> Any:
+    def __mapper(self, val: Any) -> Any:
         """Create self if val is a dictionary, else return the object."""
         if isinstance(val, dict):
             return RecursiveNamespace(**val)
@@ -25,10 +25,7 @@ class RecursiveNamespace(SimpleNamespace):
 
     def get(self, key: str, default: Any = None) -> Any:
         """dict.get() implementation for namespace."""
-        if default is None:
-            return getattr(self, key)
-        else:
-            return getattr(self, key, default)
+        return getattr(self, key, default)
 
     def items(self) -> List[Tuple[str, Any]]:
         """dict.items() implementation for namespace."""
